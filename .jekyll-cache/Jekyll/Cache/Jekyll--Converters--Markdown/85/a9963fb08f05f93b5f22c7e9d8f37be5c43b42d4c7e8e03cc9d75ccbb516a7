@@ -1,0 +1,14 @@
+I"�<ul>
+  <li>模块加载器设计思维导图</li>
+  <li>seajs源码分析</li>
+</ul>
+
+<h2 id="模块加载器设计">模块加载器设计</h2>
+
+<p>模块加载器设计两大核心</p>
+<ul>
+  <li><code class="highlighter-rouge">模块部分</code>：<code class="highlighter-rouge">数据初始化</code>、<code class="highlighter-rouge">模块存储</code>。每个模块创建都先初始化数据，存储在缓存对象中</li>
+  <li><code class="highlighter-rouge">资源部分</code>：<code class="highlighter-rouge">依赖管理</code>、<code class="highlighter-rouge">资源定义</code>、<code class="highlighter-rouge">动态加载script文件</code>。资源定位依赖管理是加载器设计两大核心</li>
+</ul>
+
+:ET

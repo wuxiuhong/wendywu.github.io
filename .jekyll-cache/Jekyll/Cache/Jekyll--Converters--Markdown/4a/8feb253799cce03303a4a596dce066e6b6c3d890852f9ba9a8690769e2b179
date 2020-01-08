@@ -1,0 +1,21 @@
+I"k<ul>
+  <li>什么是前端集成解决方案?</li>
+  <li>前端领域有哪些技术元素</li>
+  <li>前端集成解决方案</li>
+</ul>
+
+<p>…Copied from <code class="highlighter-rouge">12-imp.md</code>:</p>
+
+<blockquote>
+  <p>Chapter <code class="highlighter-rouge">ImpCEvalFun</code> provide some workarounds to make functional evalution works:</p>
+  <ol>
+    <li><em>step-indexed evaluator</em>, i.e. limit the recursion depth. (think about <em>Depth-Limited Search</em>).</li>
+    <li>return <code class="highlighter-rouge">option</code> to tell if it’s a normal or abnormal termination.</li>
+    <li>use <code class="highlighter-rouge">LETOPT...IN...</code> to reduce the “optional unwrapping” (basicaly Monadic binding <code class="highlighter-rouge">&gt;&gt;=</code>!)</li>
+  </ol>
+
+</blockquote>
+
+<h2 id="step-indexed-evaluator">Step-Indexed Evaluator</h2>
+
+:ET

@@ -1,0 +1,357 @@
+I"�v<ul>
+  <li>怎么理解模块化编程</li>
+  <li>模块化规范</li>
+  <li>模块加载的运行原理</li>
+</ul>
+
+<h2 id="怎么理解模块化编程">怎么理解模块化编程</h2>
+<blockquote>
+  <p>模块化是一种处理复杂系统分解成为更好的可管理模块的方式，可以把系统代码划分为一系列职责单一，高度解耦且可替换的模块。或者说有组织把一个大文件拆分独立并互相依赖的多个小模块、依赖管理、一个文件对应一个模块</p>
+</blockquote>
+
+<p>为什么需要模块化？</p>
+
+<blockquote>
+  <p>模块化降低可维护性，负责功能解耦拆分独立相互依赖的小模块，可维护性、命名空间（作用域）、依赖管理（早期用script引入，会有先后顺序）、可复用性。</p>
+</blockquote>
+
+<ul>
+  <li>很多主流的模块化解决方案通过JavaScript运行时来支持“匿名闭包”、“依赖分析”和“模块加载”等功能。</li>
+  <li>依赖分析需要在JavaScript运行时通过正则匹配到模块的依赖关系；</li>
+  <li>顺着依赖链（顺着模块声明的依赖层层进入，直到没有依赖为止）；</li>
+  <li>把所有需要加载的模块按顺序一一加载完毕。</li>
+</ul>
+
+<blockquote>
+  <blockquote>
+    <p>模块多、依赖关系负责的情况会严重影响页面性能。</p>
+  </blockquote>
+</blockquote>
+
+<h2 id="模块化规范">模块化规范</h2>
+<ul>
+  <li><code class="highlighter-rouge">CommonJS</code>;</li>
+  <li><code class="highlighter-rouge">AMD</code>用define定义模块，用require()加载模块;</li>
+  <li><code class="highlighter-rouge">CMD</code>用define(factory)</li>
+  <li><code class="highlighter-rouge">ES6模块</code>： 编译时确定模块的依赖关系；加载模块存储的是值的引用，所以全局只有一份；加载模块也是异步的</li>
+</ul>
+
+<p>有CommoneJS规范，最典型的实践就是Node.js，主要使用在服务器端，同步加载模块；
+有AMD，最典型的实践就是RequireJS，依赖前置，主要使用在浏览器端，异步加载模块。
+有CMD，最典型的实践就是sea.js，依赖就近，主要使用在浏览器端，异步加载模块。
+有ES6的Module，在语言层面定义了模块，通过export和import，吸收了CommoneJS和AMD两者的优点，兼容两标准的规范</p>
+
+<h3 id="模块发展历程">模块发展历程</h3>
+
+<p>1 函数封装 function foo(){//…}    =&gt;  全局污染
+2 对象namespace var obj = {count:1, foo:function(){}}   =&gt; 私有成员暴露，内部状态可被外部改写
+3 立即执行函数 (function(root){})(this)   =&gt; 提供逻辑划分，不解决代码本身的划分</p>
+
+<h2 id="前端模块化框架">前端模块化框架</h2>
+
+<p>一、CommonJS
+每一个文件都是一个模块，都有自己的作用域。变量、函数、类都是私有，不被其他模块取读、修改，除非用exports进行暴露，require加载模块
+三部分： module（模块标识）、 require（模块引用） exports（模块定义）
+module变量在每个模块内部，就代表当前模块；
+exports属性是对外的接口，用于导出当前模块的方法或变量；
+require()用来加载外部模块，读取并执行js文件，返回该模块的exports对象；</p>
+
+<p><code class="highlighter-rouge">思考</code>：</p>
+<ul>
+  <li>1 怎么定义一个模块？</li>
+  <li>2 如何优雅的把模块API暴露出去？ exports</li>
+  <li>3 如何方便使用依赖的模块？require</li>
+</ul>
+
+<h2 id="一体化的模块化实践方案"><code class="highlighter-rouge">一体化</code>的模块化实践方案</h2>
+
+<blockquote>
+  <p>前端模块：Template模块、JS模块、css模块</p>
+</blockquote>
+
+<p>解决的问题：</p>
+<ul>
+  <li>模块静态资源管理，一般包含JavaScript\css等其他静态资源，需要记录和管理这些静态资源；</li>
+  <li>模块依赖管理，模块间存在各种依赖关系，在加载模块时候，需要处理好这些依赖关系；</li>
+  <li>模块加载： 在模块初始化之前需要将模块的静态资源以及所依赖的模块加载并准备好；</li>
+  <li>模块沙箱（模块闭包），在JavaScript模块中我们需要主动对模块添加闭包用于解决作用域问题；</li>
+</ul>
+
+<p>编译工具管理模块</p>
+<ul>
+  <li>通过编译工具（自动化工具）对模块进行编译处理，包括对静态资源进行预处理（对javascript模块添加闭包，对css进行less预处理等);</li>
+  <li>记录每个静态的部署路径以及依赖关系并生成资源表(resource map)。</li>
+  <li>我们通过编译工具托管所有静态资源，帮我们解决模块静态资源管理、模块依赖关系、模块沙箱问题</li>
+</ul>
+
+<p>使用静态资源加载框架加载模块
+主要包含前端模块加载框架，用于javascript模块支持，控制资源的异步加载
+静态资源加载框架可以用于对页面进行持续的自适应的前端性能优化，自动对页面不同情况投递不同的资源加载方案</p>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+</pre></td><td class="rouge-code"><pre><span class="o">(</span><span class="no">function</span><span class="o">(</span><span class="no">global</span><span class="o">){</span><span class="w">
+
+  </span><span class="no">var</span><span class="w"> </span><span class="no">seajs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">global</span><span class="p">.</span><span class="no">seajs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w">
+    </span><span class="no">version</span><span class="p">:</span><span class="w"> </span><span class="k">'</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="k">'</span><span class="w">
+  </span><span class="o">}</span><span class="p">;</span><span class="w">
+  </span><span class="no">var</span><span class="w"> </span><span class="no">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{}</span><span class="p">;</span><span class="w">
+  </span><span class="no">var</span><span class="w"> </span><span class="no">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{}</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">缓存对象，模块的信息</span><span class="w">
+  </span><span class="no">var</span><span class="w"> </span><span class="no">anonymousMeta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{}</span><span class="p">;</span><span class="w">
+  </span><span class="no">var</span><span class="w"> </span><span class="no">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w">
+    </span><span class="no">FETCHEN</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="o">,</span><span class="w">
+    </span><span class="no">SAVED</span><span class="p">:</span><span class="mi">2</span><span class="o">,</span><span class="w">
+    </span><span class="no">LOADING</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="o">,</span><span class="w">
+    </span><span class="no">LOADED</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="o">,</span><span class="w">
+    </span><span class="no">EXECUTING</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="o">,</span><span class="w">
+    </span><span class="no">EXECUTED</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="o">//</span><span class="w"> </span><span class="err">资源定位</span><span class="w"> </span><span class="no">resolve</span><span class="o">(</span><span class="s2">"a"</span><span class="o">)</span><span class="w"> 
+  </span><span class="nn">seajs</span><span class="p">.</span><span class="no">resolve</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">child</span><span class="o">,</span><span class="w"> </span><span class="no">parent</span><span class="o">){</span><span class="w">
+      </span><span class="kr">if</span><span class="o">(!</span><span class="no">child</span><span class="o">)</span><span class="w"> </span><span class="kr">return</span><span class="w"> </span><span class="s2">""</span><span class="p">;</span><span class="w">
+      </span><span class="o">//</span><span class="w"> </span><span class="no">alias</span><span class="p">:</span><span class="o">{</span><span class="s2">"a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"common/js/a"</span><span class="o">}</span><span class="w"> 
+      </span><span class="no">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">parseAlias</span><span class="o">(</span><span class="no">child</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">是否有模块的短名称配置</span><span class="w">
+      </span><span class="no">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">parsePaths</span><span class="o">(</span><span class="no">child</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">是否有路径的短名称配置</span><span class="w">
+      </span><span class="no">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">normalize</span><span class="o">(</span><span class="no">child</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">是否有后缀，处理后缀</span><span class="no">js</span><span class="w">
+      </span><span class="kr">return</span><span class="w"> </span><span class="no">addBase</span><span class="o">(</span><span class="no">child</span><span class="o">,</span><span class="w"> </span><span class="no">parent</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">生成最终的路径地址</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="o">//</span><span class="w"> </span><span class="err">异步加载</span><span class="w">
+  </span><span class="nn">seajs</span><span class="p">.</span><span class="no">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">url</span><span class="o">,</span><span class="w"> </span><span class="no">callback</span><span class="o">){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">node</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">document</span><span class="p">.</span><span class="no">createElement</span><span class="o">(</span><span class="k">'</span><span class="no">script'</span><span class="o">)</span><span class="p">;</span><span class="w">
+    </span><span class="nn">node</span><span class="p">.</span><span class="no">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">url</span><span class="p">;</span><span class="w">
+    </span><span class="nn">document</span><span class="p">.</span><span class="nn">body</span><span class="p">.</span><span class="no">appendChild</span><span class="o">(</span><span class="no">node</span><span class="o">)</span><span class="p">;</span><span class="w">
+    </span><span class="nn">node</span><span class="p">.</span><span class="no">onload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(){</span><span class="w">
+      </span><span class="nn">document</span><span class="p">.</span><span class="nn">body</span><span class="p">.</span><span class="no">removeChild</span><span class="o">(</span><span class="no">node</span><span class="o">)</span><span class="p">;</span><span class="w">
+      </span><span class="no">callback</span><span class="o">()</span><span class="p">;</span><span class="w">
+    </span><span class="o">}</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="o">//</span><span class="w"> </span><span class="err">构造函数</span><span class="w"> </span><span class="err">模块</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="err">实例化</span><span class="w">
+  </span><span class="no">function</span><span class="w"> </span><span class="k">Module</span><span class="o">(</span><span class="no">uri</span><span class="o">,</span><span class="w"> </span><span class="no">deps</span><span class="o">){</span><span class="w">
+    </span><span class="nn">this</span><span class="p">.</span><span class="no">uri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">uri</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">当前模块的绝对路径地址</span><span class="w">
+    </span><span class="nn">this</span><span class="p">.</span><span class="no">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">deps</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[]</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">模块的依赖列表</span><span class="w">
+    </span><span class="nn">this</span><span class="p">.</span><span class="no">exports</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">null</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">导出的接口对象</span><span class="w">
+    </span><span class="nn">this</span><span class="p">.</span><span class="no">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">生命周期</span><span class="w"> </span><span class="err">状态码</span><span class="w"> </span><span class="mi">1</span><span class="o">(</span><span class="err">初始化</span><span class="o">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">6</span><span class="err">（加载完毕）</span><span class="w"> </span><span class="o">(</span><span class="err">避免重复加载</span><span class="o">)</span><span class="w">
+    </span><span class="nn">this</span><span class="p">.</span><span class="no">_waitings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{}</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">检测机制，谁会依赖于我，我会依赖谁</span><span class="w"> </span><span class="err">（循环依赖问题）</span><span class="w">
+    </span><span class="nn">this</span><span class="p">.</span><span class="no">_remain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">依赖模块的个数</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="nn">prototype</span><span class="p">.</span><span class="no">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">this</span><span class="p">;</span><span class="w">
+    </span><span class="nn">m</span><span class="p">.</span><span class="no">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">status</span><span class="p">.</span><span class="no">LOADING</span><span class="p">;</span><span class="w">
+   
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="nn">prototype</span><span class="p">.</span><span class="no">fetch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">requestCache</span><span class="o">){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">this</span><span class="p">;</span><span class="w">
+    </span><span class="nn">m</span><span class="p">.</span><span class="no">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">status</span><span class="p">.</span><span class="no">FETCHEN</span><span class="p">;</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="nn">prototype</span><span class="p">.</span><span class="no">onload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">mod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">this</span><span class="p">;</span><span class="w">
+    </span><span class="nn">mod</span><span class="p">.</span><span class="no">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">status</span><span class="p">.</span><span class="no">LOADED</span><span class="p">;</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="nn">prototype</span><span class="p">.</span><span class="no">save</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">uri</span><span class="o">,</span><span class="w"> </span><span class="no">meta</span><span class="o">){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">mod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">Module</span><span class="p">.</span><span class="no">get</span><span class="o">(</span><span class="no">uri</span><span class="o">)</span><span class="p">;</span><span class="w">
+    </span><span class="nn">mod</span><span class="p">.</span><span class="no">uri</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="no">uri</span><span class="p">;</span><span class="w">
+    </span><span class="nn">mod</span><span class="p">.</span><span class="no">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">meta</span><span class="p">.</span><span class="no">deps</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[]</span><span class="p">;</span><span class="w">
+    </span><span class="nn">mod</span><span class="p">.</span><span class="no">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">meta</span><span class="p">.</span><span class="no">factory</span><span class="p">;</span><span class="w">
+    </span><span class="nn">mod</span><span class="p">.</span><span class="no">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">status</span><span class="p">.</span><span class="no">SAVED</span><span class="p">;</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="nn">prototype</span><span class="p">.</span><span class="no">exec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(){</span><span class="w">
+   
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="nn">prototype</span><span class="p">.</span><span class="no">resolve</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">mod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">this</span><span class="p">;</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">mod</span><span class="p">.</span><span class="no">deps</span><span class="p">;</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">uris</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[]</span><span class="p">;</span><span class="w">
+    </span><span class="no">for</span><span class="o">(</span><span class="no">var</span><span class="w"> </span><span class="no">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="no">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nn">ids</span><span class="p">.</span><span class="no">length</span><span class="p">;</span><span class="w"> </span><span class="no">i</span><span class="o">++){</span><span class="w">
+      </span><span class="no">uris</span><span class="o">[</span><span class="no">i</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">seajs</span><span class="p">.</span><span class="no">resolve</span><span class="o">(</span><span class="no">ids</span><span class="o">[</span><span class="no">i</span><span class="o">],</span><span class="w"> </span><span class="nn">mod</span><span class="p">.</span><span class="no">uri</span><span class="o">)</span><span class="p">;</span><span class="w">
+    </span><span class="o">}</span><span class="w">
+    </span><span class="kr">return</span><span class="w"> </span><span class="no">uris</span><span class="p">;</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">Module</span><span class="p">.</span><span class="no">define</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">factory</span><span class="o">){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">deps</span><span class="p">;</span><span class="w">
+    </span><span class="kr">if</span><span class="o">(</span><span class="no">isFunction</span><span class="o">(</span><span class="no">factory</span><span class="o">)){</span><span class="w">
+      </span><span class="o">//</span><span class="w"> </span><span class="err">解析依赖，变成字符串</span><span class="w">
+      </span><span class="no">deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">parseDependencies</span><span class="o">(</span><span class="nn">factory</span><span class="p">.</span><span class="no">toString</span><span class="o">())</span><span class="p">;</span><span class="w">
+    </span><span class="o">}</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">meta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w">
+      </span><span class="no">id</span><span class="p">:</span><span class="w"> </span><span class="k">''</span><span class="o">,</span><span class="w">
+      </span><span class="no">uri</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="o">,</span><span class="w">
+      </span><span class="no">deps</span><span class="p">:</span><span class="w"> </span><span class="no">deps</span><span class="o">,</span><span class="w">
+      </span><span class="no">factory</span><span class="p">:</span><span class="w"> </span><span class="no">factory</span><span class="w">
+    </span><span class="o">}</span><span class="p">;</span><span class="w">
+    </span><span class="no">anonymousMeta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">meta</span><span class="p">;</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+
+  </span><span class="nn">seajs</span><span class="p">.</span><span class="no">use</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">list</span><span class="o">,</span><span class="w"> </span><span class="no">callback</span><span class="o">){</span><span class="w">
+    </span><span class="nn">Module</span><span class="p">.</span><span class="no">preload</span><span class="o">(</span><span class="no">function</span><span class="o">(){</span><span class="w">
+      </span><span class="nn">Module</span><span class="p">.</span><span class="no">use</span><span class="o">(</span><span class="no">list</span><span class="o">,</span><span class="w"> </span><span class="no">callback</span><span class="o">,</span><span class="w"> </span><span class="nn">data</span><span class="p">.</span><span class="no">cwd</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">"_use_"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="no">cid</span><span class="o">())</span><span class="p">;</span><span class="w">
+    </span><span class="o">})</span><span class="p">;</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="nn">seajs</span><span class="p">.</span><span class="no">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">function</span><span class="o">(</span><span class="no">options</span><span class="o">){</span><span class="w">
+    </span><span class="no">var</span><span class="w"> </span><span class="no">key</span><span class="o">,</span><span class="w"> </span><span class="no">currl</span><span class="w">
+    </span><span class="no">for</span><span class="o">(</span><span class="no">key</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="no">options</span><span class="o">){</span><span class="w">
+      </span><span class="no">curr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">options</span><span class="o">[</span><span class="no">key</span><span class="o">]</span><span class="p">;</span><span class="w">
+      </span><span class="no">data</span><span class="o">[</span><span class="no">key</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">curr</span><span class="p">;</span><span class="w">
+    </span><span class="o">}</span><span class="w">
+  </span><span class="o">}</span><span class="w">
+
+  </span><span class="no">var</span><span class="w"> </span><span class="no">commentRegExp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">/(\/*())/</span><span class="no">mg</span><span class="p">;</span><span class="w">
+
+  </span><span class="no">var</span><span class="w"> </span><span class="no">REQUIRE_RE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">/\</span><span class="no">brequire</span><span class="err">\</span><span class="no">s</span><span class="o">*</span><span class="err">\</span><span class="o">(</span><span class="err">\</span><span class="no">s</span><span class="o">*([</span><span class="s2">"'])(.+?)\1\s*\)/g; 
+  function commentReplace(match, multi, multiText, singlePrefix){
+    return singlePrefix;
+  }
+  function parseDependencies(code){
+    var ret = [];
+    // 获取require依赖
+    code.replace(commentRegExp, commentReplace).replace(REQUIRE_RE, function(m, m1, m2){
+      if(m2) ret.push(m2);
+    });
+    return ret;
+  }
+  global.define = Module.define;
+})(this);
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+:ET
