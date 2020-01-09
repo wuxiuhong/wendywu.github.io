@@ -1,0 +1,561 @@
+I"��<ul>
+  <li>什么是Promise</li>
+  <li>传统异步解决方案</li>
+  <li>解构Promise</li>
+  <li>实现一个Promise</li>
+</ul>
+
+<blockquote>
+  <p>JavaScript作为单线程语言，其特点也是其缺陷，特点是不用处理多线程引发的占用资源、冲突等，缺陷就是同一时间，只能做一件事情。因此会存在一个问题，网络传输是有延迟的。比如A发一条信息给B, B还没返回信息给A, 那么A就会一直等待接受信息，会造成页面卡顿等问题。于是出现了异步。</p>
+</blockquote>
+
+<h2 id="什么是promise">什么是Promise</h2>
+<blockquote>
+  <p>Promise是一个容器，保存着一个异步操作的结果。Promise是一个对象，从它可以获取异步操作的消息。Promise提供了统一的api, 各种异步操作都可以用同样的方法进行处理。</p>
+</blockquote>
+
+<h2 id="传统异步解决方案">传统异步解决方案</h2>
+
+<h3 id="一callback回调">一、callback回调</h3>
+
+<p>通过参数闯入回调，未来调用回调时让函数的调用者判断发生了什么？回调函数被认为是一种高级函数，一种被作为参数传递给另一个函数(在这称作”otherFunction”)的高级函数</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="dl">'</span><span class="s1">../a.jpg</span><span class="dl">'</span><span class="o">&gt;&lt;</span><span class="sr">/img</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="dl">'</span><span class="s1">../b.jpg</span><span class="dl">'</span><span class="o">&gt;&lt;</span><span class="sr">/img</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">img</span> <span class="nx">src</span><span class="o">=</span><span class="dl">'</span><span class="s1">../c.jpg</span><span class="dl">'</span><span class="o">&gt;&lt;</span><span class="sr">/img</span><span class="err">&gt;
+</span>
+<span class="nx">$</span><span class="p">(</span><span class="dl">"</span><span class="s2">img</span><span class="dl">"</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="dl">"</span><span class="s2">title</span><span class="dl">"</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span><span class="nx">attr</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="c1">// 依次返回0 1 2</span>
+<span class="p">});</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<ul>
+  <li>优点：简单、容易理解和部署</li>
+  <li>缺点：不利于代码的阅读和维护，程序流程混乱，每个任务只能指定一个回调函数</li>
+</ul>
+
+<div class="language-coq highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="err">目录结构：</span><span class="w">
+</span><span class="o">-</span><span class="w"> </span><span class="no">iamswr</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="nn">A</span><span class="p">.</span><span class="no">txt</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="nn">B</span><span class="p">.</span><span class="no">txt</span><span class="w">
+  </span><span class="o">-</span><span class="w"> </span><span class="nn">C</span><span class="p">.</span><span class="no">txt</span><span class="w">
+  
+  </span><span class="err">其中</span><span class="w">
+  </span><span class="nn">A</span><span class="p">.</span><span class="no">txt</span><span class="err">文件里的内容为字符串</span><span class="nn">B</span><span class="p">.</span><span class="no">txt</span><span class="w">
+  </span><span class="nn">B</span><span class="p">.</span><span class="no">txt</span><span class="err">文件里的内容为字符串</span><span class="nn">C</span><span class="p">.</span><span class="no">txt</span><span class="w">
+  </span><span class="nn">C</span><span class="p">.</span><span class="no">txt</span><span class="err">文件里的内容为字符串</span><span class="k">'</span><span class="no">hello</span><span class="w"> </span><span class="no">swr'</span><span class="w">
+  
+  </span><span class="err">那么当我们想获取到</span><span class="k">'</span><span class="no">hello</span><span class="w"> </span><span class="no">swr'</span><span class="err">，会遇到什么问题呢？请看下面的代码</span><span class="w">
+  </span><span class="kr">let</span><span class="w"> </span><span class="no">fs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">require</span><span class="o">(</span><span class="k">'</span><span class="no">fs'</span><span class="o">)</span><span class="w">
+  </span><span class="nn">fs</span><span class="p">.</span><span class="no">readFile</span><span class="o">(</span><span class="k">'</span><span class="nn">A</span><span class="p">.</span><span class="no">txt'</span><span class="o">,</span><span class="k">'</span><span class="no">utf8'</span><span class="o">,</span><span class="no">function</span><span class="o">(</span><span class="no">err</span><span class="o">,</span><span class="no">data</span><span class="o">){</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">此时回调函数</span><span class="no">data</span><span class="err">值为</span><span class="k">'</span><span class="nn">B</span><span class="p">.</span><span class="no">txt'</span><span class="w">
+      </span><span class="nn">fs</span><span class="p">.</span><span class="no">readFile</span><span class="o">(</span><span class="no">data</span><span class="o">,</span><span class="k">'</span><span class="no">utf8'</span><span class="o">,</span><span class="no">function</span><span class="o">(</span><span class="no">err</span><span class="o">,</span><span class="no">data</span><span class="o">){</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="err">此时回调函数</span><span class="no">data</span><span class="err">值为</span><span class="k">'</span><span class="nn">C</span><span class="p">.</span><span class="no">txt'</span><span class="w">
+          </span><span class="nn">fs</span><span class="p">.</span><span class="no">readFile</span><span class="o">(</span><span class="no">data</span><span class="o">,</span><span class="k">'</span><span class="no">utf8'</span><span class="o">,</span><span class="no">function</span><span class="o">(</span><span class="no">err</span><span class="o">,</span><span class="no">data</span><span class="o">){</span><span class="w">
+            </span><span class="nn">console</span><span class="p">.</span><span class="no">log</span><span class="o">(</span><span class="no">data</span><span class="o">)</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="k">'</span><span class="no">hello</span><span class="w"> </span><span class="no">swr'</span><span class="w">
+          </span><span class="o">})</span><span class="w">
+      </span><span class="o">})</span><span class="w">
+  </span><span class="o">})</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="二事件发布订阅模式">二、事件发布／订阅模式</h3>
+
+<p>回调函数的事件化，任务的执行不取决于代码的顺序，而取决于某个事件是否发生</p>
+
+<ul>
+  <li>优点：容易理解，可以绑定多个事件，每个事件可以指定多个回调函数</li>
+  <li>缺点：整个程序变成了事件驱动型，运行流程会变得很不清晰</li>
+</ul>
+
+<h3 id="三deferred延迟函数">三、Deferred延迟函数</h3>
+
+<p>通过deferred对象给异步操作进行状态绑定，deferred对象提供统一的api, 对各种异步操作状态进行操作（成功、失败、进行中）</p>
+
+<ul>
+  <li>优点：避免了层层嵌套的回调函数deferred对象提供统一的接口，控制异步操作更容易；</li>
+  <li>缺点：状态不可逆，从待定状态切换到任何一个确定状态后，再次调用resole和reject对愿状态将不起任何作用；</li>
+</ul>
+
+<h2 id="解构promise">解构Promise</h2>
+
+<blockquote>
+  <p>思考： 用同步化的方法来书写异步代码</p>
+</blockquote>
+
+<p>异步操作的状态管理：成功\失败\进行中，每一个状态管理一个容器（3个），根据状态设计一个容器，container() add fire（依次找到处理函数），即成功之后的事情（找到对应的callback）、失败之后的事情（找到对应的callback）、进行中之后的事情（找到对应的callback）</p>
+
+<ul>
+  <li><code class="highlighter-rouge">成功</code> resolve()</li>
+  <li><code class="highlighter-rouge">失败</code> reject()</li>
+  <li><code class="highlighter-rouge">进行中</code></li>
+</ul>
+
+<p>知识普及：</p>
+<blockquote>
+  <p>闭包最大用处： 一个可以读取函数内部的变量，另一个就是让这些变量值保持在内存中；
+思考：封闭作用域，保存作用域，作用域链条, 不污染全局变量、块级作用域</p>
+</blockquote>
+
+<p>Promise的一些特性</p>
+<ul>
+  <li>promise是有兼容性问题的，node环境下默认支持，还可以下载相应插件来解决兼容性问题</li>
+  <li>promise是有三种状态的，等待态pending / 成功态resolved / 失败态rejected</li>
+  <li>promise的状态是可以转换的，可以从pending -&gt; resolved 或 pending -&gt; rejected，但是resolved不能转换为rejected/pending，rejected不能转换为resolved/pending，简而言之即状态只会更改一次</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="c1">// Promise构造函数的第一个参数为executor</span>
+<span class="kd">let</span> <span class="nx">promise</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span><span class="nx">reject</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">我是会被立即执行的哟</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// promise的实例都有then方法</span>
+<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span> <span class="c1">// 成功的回调</span>
+    
+<span class="p">},()</span><span class="o">=&gt;</span><span class="p">{</span> <span class="c1">// 失败的回调</span>
+    
+<span class="p">})</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>executor默认在new的时候会自动执行</li>
+  <li>每个promise的实例都有then方法</li>
+  <li>then方法中，有两个参数，分别是成功的回调函数和失败的回调函数</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre><span class="c1">// 默认时为pending态，既不会走成功的回调也不会走失败的回调</span>
+<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">success1</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">},()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">error1</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">2</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="c1">// 在这段代码中，只会打印出'2'，因为promise一直处于pending态，不会走then后的回调函数</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="kd">let</span> <span class="nx">promise</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span><span class="nx">reject</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">1</span><span class="dl">'</span><span class="p">)</span>
+    <span class="nx">resolve</span><span class="p">()</span> <span class="c1">// 更改pending状态为resolved</span>
+<span class="p">})</span>
+
+<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">success1</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">},()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">error1</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">2</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="c1">// 此时输出顺序为'1' -&gt; '2' -&gt; 'success1'</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>then方法是异步的，属于微任务，从上面的例子可以看出，先执行完同步代码，再执行异步代码</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="rouge-code"><pre><span class="kd">let</span> <span class="nx">promise</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span><span class="nx">reject</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">1</span><span class="dl">'</span><span class="p">)</span>
+    <span class="nx">setTimeout</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span> <span class="c1">// 异步行为</span>
+        <span class="nx">resolve</span><span class="p">()</span> <span class="c1">// 更改状态为成功</span>
+    <span class="p">},</span><span class="mi">1000</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">success1</span><span class="dl">"</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">success2</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">2</span><span class="dl">"</span><span class="p">)</span>
+
+<span class="c1">// 此时输出顺序为'1' -&gt; '2' -&gt; 'success1' -&gt; 'success2'</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>同一个promise的实例可以then多次,成功时会调用所有的成功方法，失败时会调用所有的失败方法</li>
+  <li>new Promise中可以支持异步行为</li>
+  <li>如果发现错误，就会进入失败态</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="kd">let</span> <span class="nx">promise</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span><span class="nx">reject</span><span class="p">){</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="dl">'</span><span class="s1">出错了</span><span class="dl">'</span><span class="p">)</span> <span class="c1">// 抛出错误</span>
+<span class="p">})</span>
+
+<span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">success1</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">},()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">error1</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// 此时输出为 'error1'</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="实现一个promise">实现一个Promise</h2>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+</pre></td><td class="rouge-code"><pre><span class="kd">function</span> <span class="nb">Promise</span><span class="p">(</span><span class="nx">executor</span><span class="p">){</span>
+  <span class="kd">let</span> <span class="nb">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+  <span class="nb">self</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span> <span class="c1">// 成功的值</span>
+  <span class="nb">self</span><span class="p">.</span><span class="nx">reason</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span> <span class="c1">// 失败的值</span>
+  <span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">pending</span><span class="dl">"</span><span class="p">;</span> <span class="c1">// 目前promise的状态为pending，还有resolved、rejected</span>
+  <span class="nb">self</span><span class="p">.</span><span class="nx">onResolvedCallbacks</span> <span class="o">=</span> <span class="p">[];</span> <span class="c1">// 可能new promise的时候存在异步操作，把成功和失败回调保存起来</span>
+  <span class="nb">self</span><span class="p">.</span><span class="nx">onRejectedCallbacks</span> <span class="o">=</span> <span class="p">[];</span>
+
+  <span class="c1">// 把状态更改为成功</span>
+  <span class="kd">function</span> <span class="nx">resolve</span><span class="p">(</span><span class="nx">value</span><span class="p">){</span> 
+    <span class="c1">// 只有pending状态才能转为成功状态</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">pending</span><span class="dl">'</span><span class="p">){</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">resolved</span><span class="dl">"</span><span class="p">;</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">onResolvedCallbacks</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">fn</span> <span class="o">=&gt;</span> <span class="nx">fn</span><span class="p">());</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">reject</span><span class="p">(</span><span class="nx">reason</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">pending</span><span class="dl">'</span><span class="p">){</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">rejected</span><span class="dl">"</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">reason</span> <span class="o">=</span> <span class="nx">reason</span><span class="p">;</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">onRejectedCallbacks</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">fn</span> <span class="o">=&gt;</span> <span class="nx">fn</span><span class="p">());</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nx">executor</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">reject</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cm">/**
+ * 所有的promise都遵循这个规范，所有的promise可以通用
+ * @param {*} promise2  then的返回值，返回新的promise
+ * @param {*} x then中成功函数或失败函数的返回值
+ * @param {*} resolve  promise2的resolve
+ * @param {*} reject promise2的reject
+ */</span>
+<span class="kd">function</span> <span class="nx">resolvePromise</span><span class="p">(</span><span class="nx">promise2</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">){</span>
+  <span class="c1">// promise2和x是同一个对象，reject</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">promise2</span> <span class="o">===</span> <span class="nx">x</span><span class="p">){</span>
+    <span class="k">return</span> <span class="nx">reject</span><span class="p">(</span><span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="dl">'</span><span class="s1">Chaining cycle detected for promise</span><span class="dl">'</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="kd">let</span> <span class="nx">called</span><span class="p">;</span>
+  <span class="c1">// then的返回值是promise，当x为对象或者函数，才可能是promise</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">x</span><span class="o">!==</span><span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">x</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">object</span><span class="dl">'</span> <span class="o">||</span> <span class="k">typeof</span> <span class="nx">x</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">function</span><span class="dl">'</span><span class="p">)){</span>
+
+    <span class="k">try</span><span class="p">{</span>
+      <span class="kd">let</span> <span class="nx">then</span> <span class="o">=</span> <span class="nx">x</span><span class="p">.</span><span class="nx">then</span><span class="p">;</span>
+      <span class="c1">// x可以还是个promise，排除{then:{}}</span>
+      <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">then</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">function</span><span class="dl">'</span><span class="p">){</span>
+        <span class="nx">then</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="p">(</span><span class="nx">y</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span>
+          <span class="c1">// y是返回promise后成功结果</span>
+          <span class="c1">// 如果别人的promise可能既会调resolve也会调reject，那么就会出问题了，所以我们接下来要限制</span>
+          <span class="k">if</span><span class="p">(</span><span class="nx">called</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+          <span class="nx">called</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+          <span class="c1">// 代码会一直递归，取到最后一层promis</span>
+          <span class="nx">resolvePromise</span><span class="p">(</span><span class="nx">promise2</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">);</span>
+       
+        <span class="p">},(</span><span class="nx">err</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span>
+          <span class="c1">// 返回promise失败结果</span>
+          <span class="k">if</span><span class="p">(</span><span class="nx">called</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+          <span class="nx">called</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+          <span class="nx">reject</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+        <span class="p">});</span>
+      <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+        <span class="nx">resolve</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="c1">// 如果then不是函数的话，那么则是普通对象，直接走resolve成功</span>
+      <span class="p">}</span>
+    <span class="p">}</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">called</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+      <span class="nx">called</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="nx">reject</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+    <span class="c1">// x为一个常量，则是走resolve成功</span>
+    <span class="nx">resolve</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">then</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">onFullfilled</span><span class="p">,</span> <span class="nx">onRejected</span><span class="p">){</span>
+  <span class="kd">let</span> <span class="nb">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+  <span class="c1">// 那么我们new一个新的promise，并且把以下代码放到promise中</span>
+  <span class="kd">let</span> <span class="nx">promise2</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">resolved</span><span class="dl">'</span><span class="p">){</span>
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// 这里的x， 上一层then执行返回的结果</span>
+        <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">onFullfilled</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+        <span class="c1">// 提供一个resolvePromise函数处理promise2， then不管是成功回调、失败回调，返回值可能为promise／普通值／抛出错误值</span>
+        <span class="nx">resolvePromise</span><span class="p">(</span><span class="nx">promise2</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+        <span class="nx">reject</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">rejected</span><span class="dl">'</span><span class="p">){</span>
+      <span class="k">try</span> <span class="p">{</span>
+        <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span>  <span class="nx">onRejected</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">reason</span><span class="p">);</span>
+        <span class="nx">resolvePromise</span><span class="p">(</span><span class="nx">promise2</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">);</span>
+      <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+        <span class="nx">reject</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">status</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">pending</span><span class="dl">'</span><span class="p">){</span>
+      <span class="c1">// 把成功回调函数，存到改数组中，把参数传进去，不需要将来遍历onResolvedCallbacks时，再传参</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">onResolvedCallbacks</span><span class="p">.</span><span class="nx">push</span><span class="p">(()</span><span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">onFullfilled</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+            <span class="nx">resolvePromise</span><span class="p">(</span><span class="nx">promise2</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+          <span class="nx">reject</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">});</span>
+      <span class="nb">self</span><span class="p">.</span><span class="nx">onRejectedCallbacks</span><span class="p">.</span><span class="nx">push</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+          <span class="kd">let</span> <span class="nx">x</span> <span class="o">=</span>  <span class="nx">onRejected</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="nx">reason</span><span class="p">);</span>
+          <span class="nx">resolvePromise</span><span class="p">(</span><span class="nx">promise2</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">){</span>
+          <span class="nx">reject</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">});</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+  <span class="k">return</span> <span class="nx">promise2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 是否为模块引入，健壮性判断</span>
+<span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">module</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">undefined</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">undefined</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nb">Promise</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">define</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">function</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">define</span><span class="p">.</span><span class="nx">amd</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">define</span><span class="p">([],</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nb">Promise</span><span class="p">;</span>
+    <span class="p">});</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nb">window</span><span class="p">.</span><span class="nb">Promise</span> <span class="o">=</span> <span class="nb">Promise</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+:ET

@@ -1,0 +1,424 @@
+I"�g<ul>
+  <li>内存分配：内存模型</li>
+  <li>生命周期：内存的生命周期、内存泄漏、内存常驻</li>
+  <li>垃圾回收：垃圾回收机制</li>
+</ul>
+
+<h2 id="javascript的执行机制--eventloop">JavaScript的执行机制 － eventloop</h2>
+
+<p>执行顺序：</p>
+
+<blockquote>
+  <p>开始执行  ＝&gt; 逐步执行代码  =&gt; 有代码异步操作 ＝&gt;  异步操作插入到异步队列 =&gt; 全部执行完毕 =&gt; 询问是否有异步 =&gt; 异步队列 =&gt; 异步任务的回调回到主任务执行</p>
+</blockquote>
+
+<p>异步队列里包含微任务和宏任务</p>
+<ul>
+  <li>宿主环境（常见的两种宿主环境有浏览器和node）提供的叫宏任务，由语言标准（比如ES6提供的promise）提供的叫微任务</li>
+  <li>微任务：Promise, process.nextTick</li>
+  <li>宏任务：整体代码script、setTimeout、setInterval</li>
+  <li>async本身不是异步操作， await是等待，后面的代码都不执行，await从使用上来说，必须等待一个promise</li>
+</ul>
+
+<h6 id="学习微宏任务异步">学习微宏任务，异步</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+</pre></td><td class="rouge-code"><pre><span class="c1">// 一、学习微宏任务，异步</span>
+<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">set1</span><span class="dl">'</span><span class="p">);</span>
+  <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">){</span>
+    <span class="nx">resolve</span><span class="p">();</span>
+  <span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then3</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+
+<span class="c1">// 微任务</span>
+<span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">pr1</span><span class="dl">'</span><span class="p">);</span>
+  <span class="nx">resolve</span><span class="p">();</span>
+<span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then1</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// 宏任务</span>
+<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">set2</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// 微任务</span>
+<span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">){</span>
+  <span class="nx">resolve</span><span class="p">();</span>
+<span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then2</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+
+<span class="c1">// 执行结果 pr1 3 then1 then2 set1 then3 set2</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h6 id="学习async异步">学习async、异步</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="rouge-code"><pre><span class="c1">// 二、学习async、异步</span>
+<span class="c1">// async本身不是异步函数</span>
+<span class="k">async</span> <span class="kd">function</span> <span class="nx">a</span><span class="p">(){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">async</span><span class="dl">'</span><span class="p">)</span>
+  <span class="c1">// await是等待，后面的代码都不执行，await从使用上来说，必须等待一个promise</span>
+  <span class="kd">const</span> <span class="nx">b</span> <span class="o">=</span> <span class="k">await</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">resolve</span><span class="p">){</span>
+    <span class="nx">resolve</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+  <span class="p">});</span> 
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">a</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1">// 执行结果 async 3 5 7</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h6 id="循环中异步处理">循环中异步处理</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre></td><td class="rouge-code"><pre><span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+  <span class="nx">setTimeout</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="c1">// 执行都是10</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+  <span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">){</span>
+    <span class="nx">setTimeout</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="c1">// 执行都是0123456789</span>
+    <span class="p">});</span>
+  <span class="p">})(</span><span class="nx">i</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// node读取文件、网络都是异步的</span>
+<span class="kd">var</span> <span class="nx">arr</span> <span class="o">=</span> <span class="p">[</span><span class="dl">'</span><span class="s1">url</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">url</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">url</span><span class="dl">'</span><span class="p">];</span>
+<span class="c1">// 把这个数组里面的文件都读取出来</span>
+<span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+  <span class="c1">// 这里是错的，不对的，这里都是最后一条</span>
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="kd">function</span><span class="p">(){</span>
+
+  <span class="p">});</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>微任务会先于宏任务； 微任务队列空了，才会执行下一个宏任务，异步队列执行的时候，只要有微任务，都优先执行微任务</p>
+
+<h2 id="作用域链与引用类型">作用域链与引用类型</h2>
+
+<ul>
+  <li>对象、数组是引用类型</li>
+  <li>参数在方法内，相当于是个局部变量</li>
+  <li>js查找变量会从当前作用域逐级向上查找，直到window，如果window没有，则为undefined</li>
+</ul>
+
+<h6 id="对象数组使用">对象、数组使用</h6>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span>
+<span class="kd">function</span> <span class="nx">f</span><span class="p">(){</span>
+  <span class="nx">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+  <span class="nx">a</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="nx">f</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span> <span class="c1">// 执行结果［100］</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h6 id="参数在方法内相当于是个局部变量">参数在方法内，相当于是个局部变量</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre><span class="c1">// 添加一个参数</span>
+<span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span>
+<span class="kd">function</span> <span class="nx">f</span><span class="p">(</span><span class="nx">a</span><span class="p">){</span>
+  <span class="c1">// a是局部变量和外面的a是没有关系的, 这里a只是内存地址和外面的a是一样的</span>
+  <span class="nx">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// 引用类型，</span>
+  <span class="nx">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">];</span> <span class="c1">// 对局部变量赋予给了新的数组，切断了和外面的联系</span>
+  <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="c1">// 引用类型</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="c1">// 执行结果［100，5]</span>
+<span class="p">}</span>
+
+<span class="nx">f</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span> <span class="c1">// 执行结果［1, 2, 3, 4］</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h6 id="对象数组是引用类型">对象、数组是引用类型</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="c1">// 对象、数组是引用类型</span>
+<span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span>
+<span class="kd">var</span> <span class="nx">b</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span> <span class="c1">// 将数组a的内存地址指向b</span>
+<span class="nx">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span> <span class="c1">// 执行结果［1, 2, 3, 4］</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="p">{</span> <span class="na">n</span><span class="p">:</span><span class="mi">1</span> <span class="p">};</span>
+<span class="kd">var</span> <span class="nx">b</span> <span class="o">=</span> <span class="nx">a</span><span class="p">;</span>
+<span class="c1">// a.x  .号运算优先级最高，从右往左运行</span>
+<span class="nx">a</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">a</span> <span class="o">=</span> <span class="p">{</span><span class="na">n</span><span class="p">:</span><span class="mi">2</span><span class="p">};</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">x</span><span class="p">);</span> <span class="c1">// undefined</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">x</span><span class="p">);</span> <span class="c1">// {n:2}</span>
+
+<span class="c1">// 假设{n:1}内存地址是1000</span>
+<span class="c1">// a.x要申请一块新的内存地址</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h6 id="js查找变量作用域逐级向上查找">js查找变量作用域逐级向上查找</h6>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="kd">var</span> <span class="nx">c</span> <span class="o">=</span> <span class="mi">123</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">a</span><span class="p">(){</span>
+   <span class="c1">// js查找变量会从当前作用域逐级向上查找，直到window，如果window没有，则为undefined</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">c</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>javascript随便扩容，删减</p>
+
+<p>扩展：Javascript的数组并不是数据结构意义上的数组，为什么？</p>
+<ul>
+  <li>1 数据结构意义上的数组是，连续想等内存变量。必须规定大小、类型</li>
+  <li>2 真的数组是不可以扩容的</li>
+</ul>
+
+<blockquote>
+  <p>思考：数据结构上，扩容一个数组，内存做了什么？</p>
+</blockquote>
+
+<h2 id="v8引擎内存问题">V8引擎内存问题</h2>
+
+<p>v8引擎，浏览器可以拿到最多1.4g的内存可以支配（64位），32位是700mb<br />
+node它可以使用c++的内存, 最大可以达到2000多MB</p>
+
+<blockquote>
+  <p>回收的时候，会暂停js执行，回收会100MB内存大概需要10毫秒，so内存快接近满才回收，除非主动回收</p>
+</blockquote>
+
+<p>内存如何回收</p>
+<ul>
+  <li>内存快接近满 ＝&gt; 不回收(全局变量)</li>
+  <li>内存快接近满 ＝&gt; 回收(局部变量且失去引用)</li>
+</ul>
+
+<p>内存查看</p>
+<ul>
+  <li>浏览器：window.performance;</li>
+  <li>node-process.memoryUsage();</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+</pre></td><td class="rouge-code"><pre><span class="kd">function</span> <span class="nx">getme</span><span class="p">(){</span>
+  <span class="kd">var</span> <span class="nx">mem</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">memoryUsage</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">format</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">bytes</span><span class="p">){</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">bytes</span><span class="o">/</span><span class="mi">1024</span><span class="o">/</span><span class="mi">1024</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="dl">'</span><span class="s1">MB</span><span class="dl">'</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">heapTotal:</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">format</span><span class="p">(</span><span class="nx">mem</span><span class="p">.</span><span class="nx">heapTotal</span><span class="p">)</span> <span class="o">+</span>
+   <span class="dl">'</span><span class="s1">heapUsed:</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">format</span><span class="p">(</span><span class="nx">mem</span><span class="p">.</span><span class="nx">heapUsed</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="c1">// JS stack trace 内存不足</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">arrall</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="c1">// setTimeout(function(){</span>
+<span class="c1">//   arrall.push(new Array(size));</span>
+<span class="c1">// });</span>
+
+<span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span> <span class="mi">20</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+  <span class="nx">getme</span><span class="p">();</span>
+  <span class="c1">// 给全局变量大小限制</span>
+  <span class="k">if</span><span class="p">(</span><span class="nx">arrall</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">arrall</span><span class="p">.</span><span class="nx">shift</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="nx">arrall</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">b</span><span class="p">(){</span>
+  <span class="kd">var</span> <span class="nx">arr1</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr2</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr3</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr4</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr5</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr6</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr7</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr8</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr9</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">arr10</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">b</span><span class="p">();</span>
+<span class="nx">getme</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">arr11</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="nx">arr11</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="nx">arr11</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">arr12</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">arr13</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">arr14</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="nx">getme</span><span class="p">();</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<blockquote>
+  <p>思考：如何避免，针对全局变量，对全局变量限制, 如果用node服务，全局变量，只要服务开着，全局变量不会被回收</p>
+</blockquote>
+
+<p>容易引发内存使用</p>
+<ul>
+  <li>1 滥用全局变量，记得及时回收</li>
+  <li>2 缓存不限制</li>
+  <li>3 操作大文件</li>
+</ul>
+
+:ET

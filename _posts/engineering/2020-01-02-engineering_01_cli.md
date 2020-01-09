@@ -1,5 +1,5 @@
 ---
-title: "浅谈前端集成解决方案"
+title: "前端集成解决方案"
 subtitle: "「前端工程化」- 浅谈前端集成解决方案"
 header-img: "img/post-bg-halting.jpg"
 header-mask: 0.2
