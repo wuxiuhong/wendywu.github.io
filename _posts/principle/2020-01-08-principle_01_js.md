@@ -1,6 +1,6 @@
 ---
 title: "浅谈JavaScript的执行机制"
-subtitle: "JavaScript的执行机制"
+subtitle: "「JavaScript基础原理」- JavaScript的执行机制"
 header-img: "img/post-bg-apple-event-2015.jpg"
 header-mask: 0.2
 layout: post

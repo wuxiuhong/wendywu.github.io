@@ -1,6 +1,6 @@
 ---
 title: "JavaScript内存管理机制"
-subtitle: "JavaScript内存管理机制"
+subtitle: "「JavaScript基础原理」- JavaScript内存管理机制"
 header-img: "img/post-bg-apple-event-2015.jpg"
 header-mask: 0.2
 layout: post
