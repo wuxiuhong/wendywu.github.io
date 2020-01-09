@@ -1,0 +1,249 @@
+I"�<blockquote>
+  <p>思考：为什么我们要了解底层。如果一个东西谁都会，那个这个东西就会变得不值钱；了解底层才能不是一个简单搬砖工；除了底层外，视野，技术的全面性也是格外重要。</p>
+</blockquote>
+
+<h2 id="面试方向">面试方向</h2>
+
+<ul>
+  <li><code class="highlighter-rouge">基础知识</code></li>
+  <li><code class="highlighter-rouge">底层类</code>, 一些稀奇古怪的js题，或者直接某个底层技巧（JavaScript异步机制、JavaScript回收机制，JavaScript变量机制)</li>
+  <li><code class="highlighter-rouge">源码类</code>, Vue(比如axios、vuex、vue-route源码)、React<br /></li>
+  <li><code class="highlighter-rouge">项目</code>，项目里面做了什么事情，或者介绍一些项目。(一些操作，同构、移动解决方案、组件库、架构、
+一些优化操作（比如管理keep-alive, 如何分模块管理页面、缓存操作）)</li>
+</ul>
+
+<h2 id="前端知识大纲">前端知识大纲</h2>
+
+<p>JavaScript、计算机网络、Vue、React、Node、工程化、项目实践</p>
+
+<h6 id="一javascript">一、JavaScript</h6>
+
+<p>1 函数</p>
+<ul>
+  <li>JavaScript内存管理</li>
+  <li>保证代码质量（技巧）</li>
+  <li>提高代码可靠性</li>
+  <li>underscore源码分析</li>
+  <li>compose函数和pipe函数</li>
+  <li>高阶函数</li>
+  <li>常用函数</li>
+  <li>防抖和节流（技巧）</li>
+  <li>深拷贝和浅拷贝（技巧）</li>
+</ul>
+
+<p>2 异步编程</p>
+<ul>
+  <li>同步和异步</li>
+  <li>Event Loop机制（浏览器和node.js）</li>
+  <li>异步编程方法（发布／订阅、深入理解promise、generator函数及其异步应用、深入理解async／await）</li>
+  <li>处理异步的框架 - Rxjs</li>
+  <li>WebWorker的多线程机制</li>
+</ul>
+
+<p>3 设计模式</p>
+<ul>
+  <li>设计模式概论</li>
+  <li>封装与对象</li>
+  <li>提高复用</li>
+  <li>提高可扩展性</li>
+  <li>提高代码质量</li>
+</ul>
+
+<h6 id="二-计算机网络">二 计算机网络</h6>
+
+<p>1 网络协议</p>
+<ul>
+  <li>TCP/IP</li>
+  <li>HTTP</li>
+  <li>TLS</li>
+  <li>HTTPS &amp; HTTP3</li>
+</ul>
+
+<p>2 网络请求</p>
+<ul>
+  <li>Request(Form提交、Ajax和Fetch、文件上传、Axios源码分析)</li>
+  <li>webSocket</li>
+  <li>缓存</li>
+</ul>
+
+<p>3 网络安全</p>
+<ul>
+  <li>同源策略</li>
+  <li>XSS攻击</li>
+  <li>CSRF攻击</li>
+</ul>
+
+<p>4 模块加载</p>
+<ul>
+  <li>模块加载方案</li>
+  <li>闭包</li>
+  <li>资源定位 异步加载</li>
+  <li>解析依赖</li>
+  <li>Webcomponent</li>
+</ul>
+
+<p>5 路由</p>
+
+<h6 id="三-vue">三 Vue</h6>
+
+<p>1 初识Vue</p>
+<ul>
+  <li>Hello Vue</li>
+  <li>模版语法 &amp; 事件绑定</li>
+  <li>计算属性 &amp; watch</li>
+</ul>
+
+<p>2 探索Vue的组件世界</p>
+<ul>
+  <li>生命周期 &amp; 函数式组件</li>
+  <li>自定义指令</li>
+  <li>双向绑定与单项数据流</li>
+  <li>插槽</li>
+  <li>组件化</li>
+</ul>
+
+<p>3 深入Vue源码设计</p>
+<ul>
+  <li>响应式</li>
+  <li>插件</li>
+  <li>渲染函数</li>
+</ul>
+
+<p>4 Vue生态</p>
+<ul>
+  <li>状态管理vuex</li>
+  <li>路由 vue-router</li>
+  <li>服务端渲染nuxt.js</li>
+  <li>Vue DevTools</li>
+  <li>Composition API RFC</li>
+</ul>
+
+<p>5 Vue实践</p>
+<ul>
+  <li>对话框</li>
+  <li>表单</li>
+  <li>动画切换效果实现</li>
+</ul>
+
+<p>6 企业级组件系统架构</p>
+<ul>
+  <li>可复用组件设计</li>
+  <li>权限控制</li>
+  <li>自定义皮肤设置</li>
+  <li>国际化设置</li>
+  <li>自动化页面埋点</li>
+</ul>
+
+<p>7 Vue3.0</p>
+
+<h6 id="四react">四、React</h6>
+
+<p>1 入门结束
+2 JSX介绍
+3 组件基础知识
+4 组件进阶
+5 react生态
+6 react原理
+7 react-hooks
+8 react高级实践和性能优化
+9 状态管理</p>
+
+<h6 id="五node">五、Node</h6>
+
+<p>1 Node.js基础</p>
+<ul>
+  <li>Node.js发展简介</li>
+  <li>Node提供的能力原生API</li>
+  <li>Node原生的Web Server实践</li>
+  <li>Node Web Server的写法</li>
+  <li>Node进阶及原理解析</li>
+  <li>Node原生的局限性与框架的必要性</li>
+</ul>
+
+<p>2 Web服务及Koa</p>
+<ul>
+  <li>Koa给出的函数，解决原生困难</li>
+  <li>Koa重写Web Server</li>
+  <li>Koa进阶及原理解析</li>
+  <li>Koa源码分析 &amp; 手写Koa核心代码</li>
+  <li>koa在企业开发中应用</li>
+</ul>
+
+<p>3 企业级Node.js框架</p>
+<ul>
+  <li>企业级应用对Koa提出的挑战级BEF开发模式</li>
+  <li>手写企业Node框架</li>
+  <li>Node框架基建</li>
+  <li>云上的Node及微服务</li>
+</ul>
+
+<h6 id="六工程化">六、工程化</h6>
+
+<p>1 脚本世界</p>
+<ul>
+  <li>玩转npm</li>
+  <li>base简介和快速入门</li>
+  <li>Node开发简单cli工具</li>
+</ul>
+
+<p>2 规范先行</p>
+<ul>
+  <li>代码风格</li>
+  <li>版本规范和Changelog</li>
+  <li>其他规约</li>
+</ul>
+
+<p>3 质量</p>
+<ul>
+  <li>code review</li>
+  <li>测试基础</li>
+  <li>单元测试</li>
+  <li>e2e测试</li>
+  <li>测试驱动开发</li>
+  <li>监控和异常上报</li>
+</ul>
+
+<p>4 工程设计</p>
+<ul>
+  <li>工程设计简介</li>
+  <li>工程结构范式</li>
+  <li>多仓库选型</li>
+</ul>
+
+<p>5 构建艺术</p>
+<ul>
+  <li>构建简史</li>
+  <li>babel（token到ast，编译理论、基本概念、使用、插件编写）</li>
+  <li>深入webpack（设计思想（tapable源码分析）、高级使用、从create-react-app学习配置、loader详解、Plugin详解、常见plugin使用指南）</li>
+</ul>
+
+<p>6 持续集成与部署</p>
+<ul>
+  <li>CI/CD简介</li>
+  <li>持续集成（巧用github、CI平台，一jenkyins为例）</li>
+  <li>部署（前后的分离、发布策略、多环境发布）</li>
+  <li>虚拟化（docker、kubernetes）</li>
+</ul>
+
+<p>7 Git</p>
+<ul>
+  <li>Git原理介绍</li>
+  <li>Git基础操作 － 常用命令</li>
+  <li>Git进阶（rebase作用、reset和revert的区别、reflog、cherry-pick、git和shell结合）</li>
+  <li>前端工程化应用 － busky-link-staged</li>
+</ul>
+
+<p>8 效率工具</p>
+<ul>
+  <li>真机远程代码调试</li>
+  <li>‘无线’调试</li>
+  <li>移动端调试</li>
+  <li>使用代理攻击进行</li>
+  <li>公网访问本地服务</li>
+  <li>随机数据的生成</li>
+  <li>restful api 快速</li>
+  <li>svrx</li>
+</ul>
+
+<h6 id="七项目实践">七、项目实践</h6>
+:ET
